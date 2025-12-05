@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yoopi/screens/auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -40,19 +41,19 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _controller.forward();
     
     // TODO: Navigation automatique après 3 secondes vers Login/Onboarding
-    // _navigateToNext();
+    _navigateToNext();
   }
 
-  // void _navigateToNext() {
-  //   Future.delayed(const Duration(seconds: 3), () {
-  //     if (mounted) {
-  //       Navigator.pushReplacement(
-  //         context,
-  //         MaterialPageRoute(builder: (context) => const LoginScreen()),
-  //       );
-  //     }
-  //   });
-  // }
+   void _navigateToNext() {
+     Future.delayed(const Duration(seconds: 3), () {
+       if (mounted) {
+         Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+         );
+       }
+     });
+   }
 
   @override
   void dispose() {
