@@ -31,6 +31,15 @@ dependencies:
   flutter:
     sdk: flutter
 
+  firebase_core: ^4.2.1
+  firebase_auth: 6.1.2
+  cloud_firestore: ^6.1.0
+
+  provider: ^6.1.1
+  uuid: ^4.3.3                  # Générer des IDs uniques
+  intl: ^0.19.0                 # Format de dates
+  image_picker: ^1.0.7          # Sélectionner des images
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -74,6 +83,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icons/
+    - assets/fonts/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -87,14 +97,14 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  fonts:
-    - family: Poppins
-      fonts:
-         - asset: assets/fonts/Poppins-Regular.ttf
-         - asset: assets/fonts/Poppins-Bold.ttf
-           weight: 700
-         - asset: assets/fonts/Poppins-Light.ttf
-           weight: 300
+  #fonts:
+  #  - family: Poppins
+  #    fonts:
+   #      - asset: assets/fonts/Poppins-Regular.ttf
+   #      - asset: assets/fonts/Poppins-Bold.ttf
+  #         weight: 700
+  #       - asset: assets/fonts/Poppins-Light.ttf
+  #         weight: 300
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

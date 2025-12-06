@@ -1,9 +1,25 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        // Version unique du plugin Google Services
+        classpath("com.android.tools.build:gradle:8.1.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
+        classpath("com.google.gms:google-services:4.4.4")
+    }
+}
+
 allprojects {
     repositories {
         google()
         mavenCentral()
     }
 }
+
+// RETIREZ le bloc plugins {} d'ici - il n'est pas nécessaire dans build.gradle.kts racine
 
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
@@ -15,6 +31,7 @@ subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

@@ -60,9 +60,9 @@ class MessageInput extends StatelessWidget {
             // Bouton d'envoi
             FloatingActionButton.small( // Utilise un FAB plus petit
               onPressed: onSendMessage,
-              backgroundColor: accentColor, // Couleur violette claire pour l'envoi
-              child: const Icon(Icons.send_rounded, color: Colors.white),
-              elevation: 0, // Pour un look plus plat
+              backgroundColor: accentColor,
+              elevation: 0, // Couleur violette claire pour l'envoi
+              child: const Icon(Icons.send_rounded, color: Colors.white), // Pour un look plus plat
             ),
           ],
         ),
