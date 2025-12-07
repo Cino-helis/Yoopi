@@ -41,11 +41,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _controller.forward();
     
     // TODO: Navigation automatique après 3 secondes vers Login/Onboarding
-    _navigateToNext();
+    //_navigateToNext();
   }
 
-   void _navigateToNext() {
-     Future.delayed(const Duration(seconds: 3), () {
+  // void _navigateToNext() {
+    /* Future.delayed(const Duration(seconds: 0), () {
        if (mounted) {
          Navigator.pushReplacement(
           context,
@@ -53,7 +53,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
          );
        }
      });
-   }
+   }*/
 
   @override
   void dispose() {

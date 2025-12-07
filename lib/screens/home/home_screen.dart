@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yoopi/screens/chats/chat_list_screen.dart';
+import 'package:yoopi/screens/settings/settings_screen.dart';
 
 // --- Placeholders Temporaires pour la structure ---
 // Ces écrans seront remplacés par les vrais fichiers plus tard (Phase 1/2/3)
@@ -64,8 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // Fonction pour l'action du Menu Hamburger
   void _openSettings() {
     // TODO: Naviguer vers l'écran des Paramètres/Profil (settings_screen.dart)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ouverture du menu Paramètres/Profil (À implémenter)')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
     );
   }
 
