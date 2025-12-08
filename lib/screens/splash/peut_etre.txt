@@ -110,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                               style: TextStyle(
                                 fontSize: 56,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
+                                color: Colors.white,
                                 letterSpacing: 2,
                                 shadows: [
                                   Shadow(
@@ -143,8 +143,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 
                 const Spacer(flex: 3),
                 
-                // Indicateur de chargement (NOUVEAU)
-                _buildLoadingIndicator(),
+                // Indicateurs de pagination
+                _buildPageIndicators(),
                 
                 const SizedBox(height: 60),
               ],
@@ -198,7 +198,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             Color(0xFFA855F7), // Violet clair
           ],
         ),
-        
       ),
       child: const Icon(
         Icons.send_rounded,
@@ -208,15 +207,23 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
   }
 
-  // NOUVEAU: Indicateur de chargement circulaire
-  Widget _buildLoadingIndicator() {
-    return const SizedBox(
-      width: 30, 
-      height: 30,
-      child: CircularProgressIndicator(
-        color: Color(0xFF7C3AED), // Couleur violette de l'indicateur
-        strokeWidth: 3,
-      ),
+  Widget _buildPageIndicators() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(3, (index) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: _currentPage == index ? 24 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: _currentPage == index 
+                ? const Color(0xFF7C3AED)
+                : Colors.white.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(4),
+          ),
         );
+      }),
+    );
   }
 }
