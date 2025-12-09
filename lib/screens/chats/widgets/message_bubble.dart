@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageBubble extends StatelessWidget {
+  final String chatId;
+  final String messageId;
   final String message;
   final String time;
-  final bool isMe; // True si le message est envoyé par l'utilisateur courant
-  final bool isRead; // True si le message a été lu (pour les messages envoyés)
+  final bool isMe;
+  final bool isRead;
 
   const MessageBubble({
     super.key,
+    required this.chatId,
+    required this.messageId,
     required this.message,
     required this.time,
     required this.isMe,
-    this.isRead = false, // Par défaut non lu
+    this.isRead = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Couleurs du thème Yoopi
-    final primaryColor = Theme.of(context).primaryColor; // deepPurple
-    final accentColor = const Color(0xFFA855F7); // Violet clair du logo
+    final primaryColor = Theme.of(context).primaryColor;
+    final accentColor = const Color(0xFFA855F7);
 
-    // Alignement du message (droite pour moi, gauche pour l'autre)
     final AlignmentGeometry alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
-    // Couleur de fond de la bulle
-    final Color bubbleColor = isMe ? accentColor : Colors.white.withOpacity(0.15); // Violet clair ou gris foncé
-    // Couleur du texte du message
-    final Color textColor = isMe ? Colors.white : Colors.white;
-    // Couleur du temps et de la coche
+    final Color bubbleColor = isMe ? accentColor : Colors.white.withOpacity(0.15);
+    final Color textColor = Colors.white;
     final Color timeColor = isMe ? Colors.white70 : Colors.white70;
 
     return Align(
@@ -38,7 +38,7 @@ class MessageBubble extends StatelessWidget {
           children: [
             Container(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75, // Limite la largeur de la bulle
+                maxWidth: MediaQuery.of(context).size.width * 0.75,
               ),
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
               decoration: BoxDecoration(
@@ -49,6 +49,13 @@ class MessageBubble extends StatelessWidget {
                   bottomLeft: isMe ? const Radius.circular(16.0) : const Radius.circular(4.0),
                   bottomRight: isMe ? const Radius.circular(4.0) : const Radius.circular(16.0),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Text(
                 message,
@@ -57,18 +64,38 @@ class MessageBubble extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Row(
-              mainAxisSize: MainAxisSize.min, // Occupe l'espace minimal
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   time,
                   style: TextStyle(color: timeColor, fontSize: 12),
                 ),
-                if (isMe) ...[ // Afficher la coche seulement pour les messages envoyés
+                if (isMe) ...[ 
                   const SizedBox(width: 4),
-                  Icon(
-                    isRead ? Icons.done_all_rounded : Icons.done_rounded,
-                    size: 16,
-                    color: isRead ? primaryColor : timeColor, // La double coche lue peut être colorée différemment
+                  // StreamBuilder pour mettre à jour l'état de lecture en temps réel
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('chats')
+                        .doc(chatId)
+                        .collection('messages')
+                        .doc(messageId)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      bool messageIsRead = isRead;
+                      
+                      if (snapshot.hasData && snapshot.data != null) {
+                        final data = snapshot.data!.data() as Map<String, dynamic>?;
+                        messageIsRead = data?['isRead'] ?? false;
+                      }
+                      
+                      return Icon(
+                        messageIsRead ? Icons.done_all_rounded : Icons.done_rounded,
+                        size: 16,
+                        color: messageIsRead 
+                            ? const Color(0xFF10B981) // Vert pour "lu"
+                            : timeColor, // Gris pour "envoyé"
+                      );
+                    },
                   ),
                 ],
               ],

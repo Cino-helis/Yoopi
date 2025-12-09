@@ -17,12 +17,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   final MessageService _messageService = MessageService();
   final UserService _userService = UserService();
 
-  @override
-  void initState() {
-    super.initState();
-    // Mettre à jour le statut à "online" quand on ouvre l'écran
-    _userService.updateStatus('online');
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,8 +84,17 @@ class _ChatListScreenState extends State<ChatListScreen> {
             );
           }
 
-          // Liste des chats
+          // Liste des chats (tri manuel en attendant l'index)
           final chats = snapshot.data!.docs;
+          
+          // Tri manuel par lastMessageTime si l'index n'est pas encore créé
+          chats.sort((a, b) {
+            final aTime = (a.data() as Map<String, dynamic>)['lastMessageTime'];
+            final bTime = (b.data() as Map<String, dynamic>)['lastMessageTime'];
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+            return (bTime as Timestamp).compareTo(aTime as Timestamp);
+          });
 
           return ListView.builder(
             itemCount: chats.length,
@@ -118,9 +122,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   final username = userData?['username'] ?? 'Utilisateur inconnu';
                   final status = userData?['status'] ?? 'offline';
 
-                  // Compter les messages non lus
-                  return FutureBuilder<int>(
-                    future: _messageService.getUnreadCount(chatId),
+                  // Compter les messages non lus en temps réel
+                  return StreamBuilder<int>(
+                    stream: _messageService.getUnreadCountStream(chatId),
                     builder: (context, unreadSnapshot) {
                       final unreadCount = unreadSnapshot.data ?? 0;
 
@@ -191,10 +195,5 @@ class _ChatListScreenState extends State<ChatListScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    // Mettre à jour le statut à "offline" quand on quitte
-    _userService.updateStatus('offline');
-    super.dispose();
-  }
+
 }

@@ -26,10 +26,62 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final MessageService _messageService = MessageService();
   final UserService _userService = UserService();
   final ScrollController _scrollController = ScrollController();
+  
+  String _currentStatus = 'offline';
+  String? _otherUserId;
 
   @override
   void initState() {
     super.initState();
+    // Marquer tous les messages comme lus dès l'ouverture du chat
+    _markMessagesAsRead();
+    // Récupérer l'ID de l'autre utilisateur et écouter son statut
+    _setupStatusListener();
+  }
+
+  // Configuration de l'écoute du statut en temps réel
+  void _setupStatusListener() async {
+    try {
+      // Récupérer les participants du chat
+      final chatDoc = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(widget.chatId)
+          .get();
+      
+      if (chatDoc.exists) {
+        final chatData = chatDoc.data() as Map<String, dynamic>;
+        final participants = List<String>.from(chatData['participants']);
+        final currentUserId = _userService.currentUserId;
+        
+        _otherUserId = participants.firstWhere(
+          (id) => id != currentUserId,
+          orElse: () => '',
+        );
+        
+        if (_otherUserId != null && _otherUserId!.isNotEmpty) {
+          // Écouter le statut en temps réel
+          _userService.getUserProfileStream(_otherUserId!).listen((snapshot) {
+            if (snapshot.exists && mounted) {
+              final userData = snapshot.data() as Map<String, dynamic>?;
+              setState(() {
+                _currentStatus = userData?['status'] ?? 'offline';
+              });
+            }
+          });
+        }
+      }
+    } catch (e) {
+      print('Erreur lors de la récupération du statut: $e');
+    }
+  }
+
+  // Marquer les messages comme lus
+  void _markMessagesAsRead() async {
+    try {
+      await _messageService.markChatAsRead(widget.chatId);
+    } catch (e) {
+      print('Erreur lors du marquage comme lu: $e');
+    }
   }
 
   void _sendMessage() async {
@@ -134,7 +186,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   Text(
                     widget.status == 'online' ? 'En ligne' : 'Hors ligne',
                     style: TextStyle(
-                      color: widget.status == 'online'
+                      color: _currentStatus == 'online'
                           ? accentColor
                           : Colors.white.withOpacity(0.7),
                       fontSize: 12,
@@ -240,6 +292,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     final isMe = messageData['senderId'] == _userService.currentUserId;
 
                     return MessageBubble(
+                      chatId: widget.chatId,
+                      messageId: messageDoc.id,
                       message: messageData['message'] ?? '',
                       time: _formatMessageTime(messageData['timestamp']),
                       isMe: isMe,

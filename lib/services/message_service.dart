@@ -122,6 +122,20 @@ class MessageService {
     await batch.commit();
   }
 
+  // Stream du compteur de messages non lus en temps réel
+  Stream<int> getUnreadCountStream(String chatId) {
+    final currentUserId = _auth.currentUser!.uid;
+    
+    return _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .where('senderId', isNotEqualTo: currentUserId)
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
+  }
+
   // Supprimer un chat
   Future<void> deleteChat(String chatId) async {
     // Supprimer tous les messages

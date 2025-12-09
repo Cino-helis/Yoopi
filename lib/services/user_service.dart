@@ -37,6 +37,26 @@ class UserService {
     }
   }
 
+  // Mettre en ligne (à appeler au démarrage de l'app)
+  Future<void> setOnline() async {
+    await updateStatus('online');
+  }
+
+  // Mettre hors ligne (à appeler au fermeture de l'app)
+  Future<void> setOffline() async {
+    await updateStatus('offline');
+  }
+
+  // Écouter l'état de l'app pour mettre à jour le statut automatiquement
+  void setupPresence(){
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      // Mettre en ligne au démarrage
+      setOnline();
+    }
+      
+  }
+
   // Stream du profil utilisateur
   Stream<DocumentSnapshot> getUserProfileStream(String uid) {
     return _firestore.collection('users').doc(uid).snapshots();
@@ -44,6 +64,9 @@ class UserService {
 
   // Rechercher des utilisateurs
   Future<QuerySnapshot> searchUsers(String query) async {
+    final queryLower = query.toLowerCase();
+
+    // Rechercher des utilisateurs par nom d'utilisateur
     return await _firestore
         .collection('users')
         .where('username', isGreaterThanOrEqualTo: query)

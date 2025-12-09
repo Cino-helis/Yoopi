@@ -126,7 +126,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             
                             // Slogan
                             Text(
-                              'Connect. Share. Discover.',
+                              'Connecter. Envoyer. Découvrir.',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.white.withOpacity(0.7),
