@@ -8,6 +8,7 @@ class MessageBubble extends StatelessWidget {
   final String time;
   final bool isMe;
   final bool isRead;
+  final bool otherUserIsOnline; // ← PARAMÈTRE AJOUTÉ
 
   const MessageBubble({
     super.key,
@@ -17,11 +18,11 @@ class MessageBubble extends StatelessWidget {
     required this.time,
     required this.isMe,
     this.isRead = false,
+    this.otherUserIsOnline = false, // ← VALEUR PAR DÉFAUT
   });
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
     final accentColor = const Color(0xFFA855F7);
 
     final AlignmentGeometry alignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
@@ -88,12 +89,20 @@ class MessageBubble extends StatelessWidget {
                         messageIsRead = data?['isRead'] ?? false;
                       }
                       
+                      // LOGIQUE DES COCHES :
+                      // ✓ (gris) = envoyé mais pas lu
+                      // ✓✓ (gris) = lu + destinataire hors ligne
+                      // ✓✓ (vert) = lu + destinataire en ligne
+                      
+                      bool showDoubleCheck = messageIsRead;
+                      bool showGreenCheck = messageIsRead && otherUserIsOnline;
+                      
                       return Icon(
-                        messageIsRead ? Icons.done_all_rounded : Icons.done_rounded,
+                        showDoubleCheck ? Icons.done_all_rounded : Icons.done_rounded,
                         size: 16,
-                        color: messageIsRead 
-                            ? const Color(0xFF10B981) // Vert pour "lu"
-                            : timeColor, // Gris pour "envoyé"
+                        color: showGreenCheck
+                            ? const Color(0xFF10B981) // Vert si lu ET en ligne
+                            : timeColor, // Gris sinon
                       );
                     },
                   ),

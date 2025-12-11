@@ -27,22 +27,18 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final UserService _userService = UserService();
   final ScrollController _scrollController = ScrollController();
   
-  String _currentStatus = 'offline';
+  bool _isOnline = false; // CHANGÉ : bool au lieu de String
   String? _otherUserId;
 
   @override
   void initState() {
     super.initState();
-    // Marquer tous les messages comme lus dès l'ouverture du chat
     _markMessagesAsRead();
-    // Récupérer l'ID de l'autre utilisateur et écouter son statut
     _setupStatusListener();
   }
 
-  // Configuration de l'écoute du statut en temps réel
   void _setupStatusListener() async {
     try {
-      // Récupérer les participants du chat
       final chatDoc = await FirebaseFirestore.instance
           .collection('chats')
           .doc(widget.chatId)
@@ -59,12 +55,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         );
         
         if (_otherUserId != null && _otherUserId!.isNotEmpty) {
-          // Écouter le statut en temps réel
+          // CORRIGÉ : Écouter isOnline au lieu de status
           _userService.getUserProfileStream(_otherUserId!).listen((snapshot) {
             if (snapshot.exists && mounted) {
               final userData = snapshot.data() as Map<String, dynamic>?;
               setState(() {
-                _currentStatus = userData?['status'] ?? 'offline';
+                _isOnline = userData?['isOnline'] ?? false; // CHANGÉ
               });
             }
           });
@@ -75,7 +71,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     }
   }
 
-  // Marquer les messages comme lus
   void _markMessagesAsRead() async {
     try {
       await _messageService.markChatAsRead(widget.chatId);
@@ -93,7 +88,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     try {
       await _messageService.sendMessage(widget.chatId, message);
       
-      // Faire défiler vers le bas après l'envoi
       Future.delayed(const Duration(milliseconds: 100), () {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
@@ -116,7 +110,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   void _attachFile() {
-    // TODO: Implémenter la logique d'attachement de fichier
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Attacher un fichier (À implémenter)')),
     );
@@ -156,20 +149,37 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         ),
         title: Row(
           children: [
-            // Avatar de l'interlocuteur
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: primaryColor.withOpacity(0.5),
-              child: Text(
-                widget.chatName.substring(0, 1).toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+            // Avatar avec indicateur de statut
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: primaryColor.withOpacity(0.5),
+                  child: Text(
+                    widget.chatName.substring(0, 1).toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
+                // AJOUTÉ : Indicateur visuel du statut
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: _isOnline ? Colors.green : Colors.grey,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: backgroundColor, width: 2),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(width: 10),
-            // Nom et Statut
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,9 +194,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    widget.status == 'online' ? 'En ligne' : 'Hors ligne',
+                    _isOnline ? 'En ligne' : 'Hors ligne', // CORRIGÉ
                     style: TextStyle(
-                      color: _currentStatus == 'online'
+                      color: _isOnline
                           ? accentColor
                           : Colors.white.withOpacity(0.7),
                       fontSize: 12,
@@ -219,7 +229,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       
       body: Column(
         children: [
-          // Liste des messages
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _messageService.getMessages(widget.chatId),
@@ -298,6 +307,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       time: _formatMessageTime(messageData['timestamp']),
                       isMe: isMe,
                       isRead: messageData['isRead'] ?? false,
+                      otherUserIsOnline: _isOnline, // AJOUTÉ : passer le statut
                     );
                   },
                 );
@@ -305,7 +315,6 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
           ),
           
-          // Barre de saisie de message
           MessageInput(
             controller: _messageController,
             onSendMessage: _sendMessage,

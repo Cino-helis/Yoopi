@@ -119,7 +119,7 @@ class _SplashScreenWithAuthState extends State<SplashScreenWithAuth> {
 
   Future<void> _navigateAfterSplash() async {
     // Attendre 3 secondes pour l'animation du splash
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 3));
 
     if (mounted) {
       // Naviguer vers AuthWrapper qui gère la logique de connexion

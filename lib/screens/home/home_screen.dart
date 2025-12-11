@@ -10,10 +10,25 @@ class GroupListScreen extends StatelessWidget {
   const GroupListScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    // Note: Ceci affichera la liste des Groupes et Canaux adhérés.
+    // Note: Ceci affichera la liste des Groupes.
     return const Center(
       child: Text(
-        'Liste des Groupes et Canaux (GroupListScreen)',
+        'Liste des Groupes',
+        style: TextStyle(color: Colors.white, fontSize: 16),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+class CanauxListScreen extends StatelessWidget {
+  const CanauxListScreen({super.key});
+  @override
+  Widget build(BuildContext context) {
+    // Note: Ceci affichera la liste des Canaux adhérés.
+    return const Center(
+      child: Text(
+        'Liste des Canaux',
         style: TextStyle(color: Colors.white, fontSize: 16),
         textAlign: TextAlign.center,
       ),
@@ -46,14 +61,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Index de l'onglet actif : 0=Chats, 1=Groupes, 2=Découverte
+  // Index de l'onglet actif : 0=Chats, 1=Groupes, 2=Canaux, 3=Découverte
   int _currentIndex = 0;
 
   // Liste des écrans correspondant aux onglets
   final List<Widget> _screens = [
     const ChatListScreen(),    // 0: Chats (Discussions 1:1) - Écran réel
-    const GroupListScreen(),   // 1: Groupes (Groupes et Canaux) - Placeholder
-    const DiscoveryScreen(),   // 2: Découverte Vidéo - Placeholder
+    const GroupListScreen(),   // 1: Groupes Placeholder
+    const CanauxListScreen(),   // 2:  Canaux Placeholder
+    const DiscoveryScreen(),   // 3: Découverte Vidéo - Placeholder
   ];
 
   // Fonction appelée lors du changement d'onglet
@@ -170,14 +186,21 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Chats',
           ),
           
-          // Onglet 2 : Groupes (Groupes et Canaux)
+          // Onglet 2 : Groupes 
           BottomNavigationBarItem(
             icon: Icon(Icons.groups_outlined),
             activeIcon: Icon(Icons.groups_rounded),
             label: 'Groupes',
           ),
+
+          // Onglet 3 :  Canaux
+          BottomNavigationBarItem(
+            icon: Icon(Icons.cast),
+            activeIcon: Icon(Icons.cast_connected_rounded),
+            label: 'Canaux',
+          ),
           
-          // Onglet 3 : Découverte Vidéo (TikTok-like)
+          // Onglet 4 : Découverte Vidéo (TikTok-like)
            BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
             activeIcon: Icon(Icons.explore_rounded),

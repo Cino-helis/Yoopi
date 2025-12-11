@@ -7,6 +7,7 @@ class ChatTile extends StatelessWidget {
   final int unreadCount;
   final String avatarUrl;
   final bool isGroup;
+  final bool isOnline; // AJOUTÉ
 
   const ChatTile({
     super.key,
@@ -16,33 +17,53 @@ class ChatTile extends StatelessWidget {
     this.unreadCount = 0,
     this.avatarUrl = '',
     this.isGroup = false,
+    this.isOnline = false, // AJOUTÉ
   });
 
   @override
   Widget build(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
 
-    // SUPPRIMEZ le InkWell avec onTap ici !
-    // La navigation est déjà gérée par ChatListScreen
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       child: Row(
         children: [
-          // 1. Avatar
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: isGroup ? primaryColor.withOpacity(0.5) : Colors.white.withOpacity(0.2),
-            child: isGroup
-                ? const Icon(Icons.groups_rounded, color: Colors.white, size: 30)
-                : Text(
-                    name.substring(0, 1).toUpperCase(),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          // Avatar avec indicateur de statut
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: isGroup ? primaryColor.withOpacity(0.5) : Colors.white.withOpacity(0.2),
+                child: isGroup
+                    ? const Icon(Icons.groups_rounded, color: Colors.white, size: 30)
+                    : Text(
+                        name.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+              ),
+              // AJOUTÉ : Indicateur de statut (seulement pour les chats privés)
+              if (!isGroup)
+                Positioned(
+                  right: 2,
+                  bottom: 2,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: isOnline ? Colors.green : Colors.grey,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        width: 2,
+                      ),
+                    ),
                   ),
+                ),
+            ],
           ),
           
           const SizedBox(width: 15),
           
-          // 2. Infos du Chat
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,7 +84,7 @@ class ChatTile extends StatelessWidget {
                   style: TextStyle(
                     color: unreadCount > 0 ? Colors.white : Colors.white.withOpacity(0.7),
                     fontSize: 14,
-                    fontStyle: unreadCount > 0 ? FontStyle.italic : FontStyle.normal,
+                    fontWeight: unreadCount > 0 ? FontWeight.w500 : FontWeight.normal,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -72,7 +93,6 @@ class ChatTile extends StatelessWidget {
             ),
           ),
           
-          // 3. Heure et Compteur de non-lus
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -81,23 +101,26 @@ class ChatTile extends StatelessWidget {
                 style: TextStyle(
                   color: unreadCount > 0 ? primaryColor : Colors.white.withOpacity(0.6),
                   fontSize: 12,
+                  fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
               const SizedBox(height: 8),
               if (unreadCount > 0)
                 Container(
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  constraints: const BoxConstraints(minWidth: 20),
                   decoration: BoxDecoration(
                     color: primaryColor,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    unreadCount.toString(),
+                    unreadCount > 99 ? '99+' : unreadCount.toString(),
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
             ],
