@@ -4,8 +4,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:yoopi/screens/splash/splash_screen.dart';
 import 'firebase_options.dart';
 import 'services/user_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'widgets/auth_wrapper.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +25,13 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  runApp(const YoopiApp());
+  runApp(
+    // AJOUTÉ : Envelopper l'application avec le Provider
+    ChangeNotifierProvider(
+      create: (context) => AuthProvider(),
+      child: const YoopiApp(),
+    ),
+      );
 }
 
 class YoopiApp extends StatefulWidget {
@@ -111,7 +119,7 @@ class _SplashScreenWithAuthState extends State<SplashScreenWithAuth> {
 
   Future<void> _navigateAfterSplash() async {
     // Attendre 3 secondes pour l'animation du splash
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 5));
 
     if (mounted) {
       // Naviguer vers AuthWrapper qui gère la logique de connexion

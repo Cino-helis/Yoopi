@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yoopi/screens/chats/chat_list_screen.dart';
 import 'package:yoopi/screens/settings/settings_screen.dart';
 
+
 // --- Placeholders Temporaires pour la structure ---
 // Ces écrans seront remplacés par les vrais fichiers plus tard (Phase 1/2/3)
 
@@ -177,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           
           // Onglet 3 : Découverte Vidéo (TikTok-like)
-          BottomNavigationBarItem(
+           BottomNavigationBarItem(
             icon: Icon(Icons.explore_outlined),
             activeIcon: Icon(Icons.explore_rounded),
             label: 'Découverte',

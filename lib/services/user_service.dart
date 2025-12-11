@@ -16,7 +16,7 @@ class UserService {
       'email': email,
       'username': username,
       'createdAt': FieldValue.serverTimestamp(),
-      'status': 'offline',
+      'isOnline': false, // CHANGÉ : utiliser isOnline au lieu de status
       'lastSeen': FieldValue.serverTimestamp(),
     });
   }
@@ -26,35 +26,27 @@ class UserService {
     return await _firestore.collection('users').doc(uid).get();
   }
 
-  // Mettre à jour le statut
-  Future<void> updateStatus(String status) async {
+  // Mettre à jour le statut en ligne
+  Future<void> setOnline() async {
     final currentUser = _auth.currentUser;
     if (currentUser != null) {
       await _firestore.collection('users').doc(currentUser.uid).update({
-        'status': status,
+        'isOnline': true,
         'lastSeen': FieldValue.serverTimestamp(),
       });
     }
   }
 
-  // Mettre en ligne (à appeler au démarrage de l'app)
-  Future<void> setOnline() async {
-    await updateStatus('online');
-  }
-
-  // Mettre hors ligne (à appeler au fermeture de l'app)
+  // Mettre hors ligne
   Future<void> setOffline() async {
-    await updateStatus('offline');
-  }
-
-  // Écouter l'état de l'app pour mettre à jour le statut automatiquement
-  void setupPresence(){
+    
     final currentUser = _auth.currentUser;
     if (currentUser != null) {
-      // Mettre en ligne au démarrage
-      setOnline();
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'isOnline': false,
+        'lastSeen': FieldValue.serverTimestamp(),
+      });
     }
-      
   }
 
   // Stream du profil utilisateur
@@ -64,9 +56,7 @@ class UserService {
 
   // Rechercher des utilisateurs
   Future<QuerySnapshot> searchUsers(String query) async {
-    final queryLower = query.toLowerCase();
 
-    // Rechercher des utilisateurs par nom d'utilisateur
     return await _firestore
         .collection('users')
         .where('username', isGreaterThanOrEqualTo: query)

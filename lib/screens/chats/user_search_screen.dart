@@ -39,7 +39,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     try {
       final results = await _userService.searchUsers(query);
       
-      // Filtrer pour ne pas afficher l'utilisateur actuel
       final currentUserId = _userService.currentUserId;
       final filteredResults = results.docs.where((doc) => doc.id != currentUserId).toList();
       
@@ -66,9 +65,8 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
   void _createChatWithUser(DocumentSnapshot userDoc) async {
     final userData = userDoc.data() as Map<String, dynamic>;
     final username = userData['username'] ?? 'Utilisateur';
-    final status = userData['status'] ?? 'offline';
+    final isOnline = userData['isOnline'] ?? false; // CHANGÉ
     
-    // Afficher un indicateur de chargement
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -78,13 +76,10 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     );
 
     try {
-      // Créer ou récupérer le chat
       final chatId = await _messageService.getOrCreateChat(userDoc.id);
       
-      // Fermer le dialog de chargement
       if (mounted) Navigator.pop(context);
       
-      // Naviguer vers le chat
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -92,13 +87,12 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             builder: (context) => ChatDetailScreen(
               chatId: chatId,
               chatName: username,
-              status: status,
+              status: isOnline ? 'online' : 'offline', // CHANGÉ
             ),
           ),
         );
       }
     } catch (e) {
-      // Fermer le dialog de chargement
       if (mounted) Navigator.pop(context);
       
       if (mounted) {
@@ -138,14 +132,12 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
       ),
       body: Column(
         children: [
-          // Barre de recherche
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
               onChanged: (value) {
-                // Recherche en temps réel
                 _searchUsers();
               },
               decoration: InputDecoration(
@@ -175,7 +167,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             ),
           ),
 
-          // Résultats de recherche
           Expanded(
             child: _buildSearchResults(primaryColor),
           ),
@@ -262,7 +253,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
         final userData = userDoc.data() as Map<String, dynamic>;
         final username = userData['username'] ?? 'Utilisateur inconnu';
         final email = userData['email'] ?? '';
-        final status = userData['status'] ?? 'offline';
+        final isOnline = userData['isOnline'] ?? false; // CHANGÉ
 
         return InkWell(
           onTap: () => _createChatWithUser(userDoc),
@@ -270,23 +261,43 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             child: Row(
               children: [
-                // Avatar
-                CircleAvatar(
-                  radius: 28,
-                  backgroundColor: primaryColor.withOpacity(0.5),
-                  child: Text(
-                    username.substring(0, 1).toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
+                // Avatar avec indicateur de statut
+                Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: primaryColor.withOpacity(0.5),
+                      child: Text(
+                        username.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
                     ),
-                  ),
+                    // AJOUTÉ : Indicateur de statut
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: isOnline ? Colors.green : Colors.grey,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 
                 const SizedBox(width: 16),
                 
-                // Infos utilisateur
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -300,25 +311,39 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        email,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
-                          fontSize: 14,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              email,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.6),
+                                fontSize: 14,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          // AJOUTÉ : Badge de statut
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: isOnline 
+                                  ? Colors.green.withOpacity(0.2)
+                                  : Colors.grey.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isOnline ? 'En ligne' : 'Hors ligne',
+                              style: TextStyle(
+                                color: isOnline ? Colors.green : Colors.grey,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
-                  ),
-                ),
-                
-                // Indicateur de statut
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: status == 'online' ? Colors.green : Colors.grey,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
                   ),
                 ),
               ],
