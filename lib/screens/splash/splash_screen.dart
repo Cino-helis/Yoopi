@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field, unused_import
+
 import 'package:flutter/material.dart';
 import 'package:yoopi/screens/auth/login_screen.dart';
 
